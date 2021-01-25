@@ -87,3 +87,8 @@ body {
 .loaded .loading {
   opacity: 0;
 }
+
+.control-panel-text.button {
+  cursor: pointer;
+  background-color: #2c5ff9;
+}
