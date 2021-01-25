@@ -48,15 +48,13 @@ body {
 
 .output_canvas {
   position: absolute;
-  height: 720px;
-  width: 1280px;
   left: 0;
   top: 0;
 }
 
 .control-panel {
   position: absolute;
-  left: 10px;
+  left: 470px;
   top: 10px;
 }
 
