@@ -24,9 +24,6 @@ const FACEMESH_FACE_OVAL = [[10,338],[338,297],[297,332],[332,284],[284,251],[25
 const FACEMESH_LIPS = [[61,146],[146,91],[91,181],[181,84],[84,17],[17,314],[314,405],[405,321],[321,375],[375,291],[61,185],[185,40],[40,39],[39,37],[37,0],[0,267],[267,269],[269,270],[270,409],[409,291],[78,95],[95,88],[88,178],[178,87],[87,14],[14,317],[317,402],[402,318],[318,324],[324,308],[78,191],[191,80],[80,81],[81,82],[82,13],[13,312],[312,311],[311,310],[310,415],[415,308]];
 
 function onResults(results) {
-  // Hide the spinner.
-  document.body.classList.add('loaded');
-
   // Update the frame rate.
   fpsControl.tick();
 
@@ -70,7 +67,10 @@ facemesh.load({
   // facemesh defaults are: maxContinuousChecks = 5, detectionConfidence = 0.9, maxFaces = 10, iouThreshold = 0.3, scoreThreshold = 0.75
 }).then(function(model) {
 
+  let run = false;
+
   model.setOptions = function(options) {
+    run = options.run;
     model.pipeline.maxFaces = options.maxNumFaces;
     model.detectionConfidence = options.minDetectionConfidence;
     model.pipeline.boundingBoxDetector.scoreThreshold = options.minTrackingConfidence;
@@ -98,6 +98,8 @@ facemesh.load({
       const ctx = results.image.getContext('2d');
 
       const loop = function () {
+
+        if (!run) return requestAnimationFrame(loop);
 
         // save video frame
         results.image.width = results.image.width;
@@ -129,6 +131,9 @@ facemesh.load({
       };
 
       loop();
+
+      // Hide the spinner.
+      document.body.classList.add('loaded');
     }
   });
 });
@@ -137,6 +142,7 @@ function showControls(faceMesh) {
 // Present a control panel through which the user can manipulate the solution
 // options.
 new ControlPanel(controlsElement, {
+      run: false,
       selfieMode: true,
       maxNumFaces: 1,
       minDetectionConfidence: 0.5,
@@ -145,6 +151,7 @@ new ControlPanel(controlsElement, {
     .add([
       new StaticText({title: 'MediaPipe Face Mesh'}),
       fpsControl,
+      new Toggle({title: 'Detect Faces', field: 'run'}),
       new Toggle({title: 'Selfie Mode', field: 'selfieMode'}),
       new Slider({
         title: 'Max Number of Faces',
