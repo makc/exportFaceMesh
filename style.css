@@ -54,13 +54,13 @@ body {
 
 .control-panel {
   position: absolute;
-  left: 470px;
+  right: 10px;
   top: 10px;
 }
 
 .loading {
   display: flex;
-  position: absolute;
+  position: fixed;
   top: 0;
   right: 0;
   bottom: 0;
