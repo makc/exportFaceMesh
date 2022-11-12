@@ -179,6 +179,35 @@ facemesh.load({
         const mesh = new THREE.Mesh( geometry, material );
         mesh.name = 'face';
 
+        // re-align the geometry
+        const p = geometry.attributes.position,
+          v1 = new THREE.Vector3(), v2 = new THREE.Vector3(), v3 = new THREE.Vector3();
+
+        // https://raw.githubusercontent.com/tensorflow/tfjs-models/master/face-landmarks-detection/mesh_map.jpg, eyes and nose:
+        v1.fromBufferAttribute(p, 33);
+        v2.fromBufferAttribute(p, 1);
+        v3.fromBufferAttribute(p, 263);
+
+        v3.lerp(v1, 0.5);
+        v1.sub(v3).normalize(); // = X direction
+        v2.sub(v3).normalize(); // = Y direction
+
+        const matrix = new THREE.Matrix4();
+        matrix.makeBasis(v1, v2, v1.clone().cross(v2).normalize());
+        matrix.setPosition(v3);
+        matrix.invert();
+
+        v1.set(1, 0, 0);
+        v2.set(0, 1, 0);
+        for(let i = 0; i < p.count; i++) {
+          v3.fromBufferAttribute(p, i)
+            .applyMatrix4(matrix) // re-align to eyes-nose frame
+            .applyAxisAngle(v1, -2.234) // turn ~128° vertically
+            .applyAxisAngle(v2, Math.PI) // turn 180° horizontally
+            .multiplyScalar(0.03); // scale down a bit
+          p.setXYZ(i, v3.x, v3.y, v3.z);
+        }
+
         // export 3D model
         const zip = new JSZip();
         zip.file('face.obj', 'mtllib face.mtl\n' + THREE.OBJExporter.prototype.parse(mesh));
